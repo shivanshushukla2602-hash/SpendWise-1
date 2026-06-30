@@ -48,3 +48,56 @@ function animateRemove(rowEl, onComplete) {
     }
   );
 }
+
+// ─── Transaction Storage Schema ────────────────────────────────────────────
+
+/**
+ * Transaction store configuration object.
+ * Defines the schema model and maintains the in-memory list of transactions.
+ */
+const TransactionStore = {
+  /** @type {Array<{id: number, name: string, amount: number, type: string, date: string}>} */
+  records: [],
+
+  /** Auto-incrementing ID counter for new transactions */
+  _nextId: 1,
+
+  /**
+   * Schema definition for a single transaction record.
+   * Serves as the canonical structure for all transaction objects.
+   */
+  schema: {
+    id: "number",       // Unique auto-generated identifier
+    name: "string",     // Transaction label / description
+    amount: "number",   // Absolute numeric value
+    type: "string",     // 'income' | 'expense'
+    date: "string",     // ISO 8601 date string
+  },
+
+  /**
+   * Initialises the store with an optional array of pre-existing records.
+   * Validates each entry against the schema before pushing to the store.
+   * @param {Array} initialData - Optional seed data array
+   */
+  init(initialData = []) {
+    this.records = [];
+    this._nextId = 1;
+
+    initialData.forEach((entry) => {
+      if (this._isValidSchema(entry)) {
+        this.records.push({ ...entry, id: this._nextId++ });
+      }
+    });
+  },
+
+  /**
+   * Checks whether a given object matches the required schema fields.
+   * @param {Object} obj - Object to validate
+   * @returns {boolean} True if all schema fields are present
+   */
+  _isValidSchema(obj) {
+    return Object.keys(this.schema).every(
+      (key) => key === "id" || key in obj
+    );
+  },
+};
