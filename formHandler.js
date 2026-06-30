@@ -54,3 +54,53 @@ function parseAmount(raw) {
 
   return parseFloat(cleaned);
 }
+
+/**
+ * Generates a table row element for a transaction log entry.
+ * Appends detail tags, index properties, and formatted currency strings.
+ * @param {Object} transaction - Transaction data object
+ * @param {number} transaction.id - Unique transaction index
+ * @param {string} transaction.name - Transaction description
+ * @param {number} transaction.amount - Transaction amount value
+ * @param {string} transaction.type - Transaction type: 'income' or 'expense'
+ * @param {string} transaction.date - ISO date string of transaction
+ * @param {number} index - Row index in the current list
+ * @returns {HTMLTableRowElement} Constructed table row element
+ */
+function renderTransactionRow(transaction, index) {
+  const { id, name, amount, type, date } = transaction;
+
+  const row = document.createElement("tr");
+  row.setAttribute("data-id", id);
+  row.setAttribute("data-index", index);
+  row.classList.add("transaction-row", `transaction-row--${type}`);
+
+  // Format currency string with sign indicator
+  const sign = type === "income" ? "+" : "-";
+  const formattedAmount = `${sign}₹${Math.abs(amount).toFixed(2)}`;
+
+  // Format date to readable locale string
+  const formattedDate = new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  row.innerHTML = `
+    <td class="tx-index">${index + 1}</td>
+    <td class="tx-name">
+      <span class="tx-label">${name}</span>
+      <span class="tx-date">${formattedDate}</span>
+    </td>
+    <td class="tx-amount ${type === "income" ? "amount--positive" : "amount--negative"}">
+      ${formattedAmount}
+    </td>
+    <td class="tx-actions">
+      <button class="btn-delete" data-id="${id}" aria-label="Delete transaction ${name}">
+        &times;
+      </button>
+    </td>
+  `;
+
+  return row;
+}
