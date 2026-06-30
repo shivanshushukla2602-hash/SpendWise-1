@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpendWise | Financial Dashboard</title>
+    <meta name="description" content="Smart personal finance tracker with analytics, charts, and budget management.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+<body>
+<div class="app-layout">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-icon"><i class="bi bi-wallet2"></i></div>
+            <div class="brand-text">
+                <h2>SpendWise</h2>
+                <span class="brand-sub">Finance Dashboard</span>
+            </div>
+        </div>
+
+        <!-- User greeting card -->
+        <div class="user-card">
+            <div class="user-avatar" id="user-avatar">SW</div>
+            <div class="user-info">
+                <p class="user-greeting" id="user-greeting">Good Morning</p>
+                <p class="user-sub">Your finances, your control</p>
+            </div>
+        </div>
+
+        <nav class="nav-container">
+            <p class="nav-label">MAIN MENU</p>
+            <ul class="nav-menu">
+                <li class="active" data-target="dashboard-section" id="nav-dashboard">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li data-target="analytics-section" id="nav-analytics">
+                    <i class="bi bi-bar-chart-line-fill"></i>
+                    <span>Analytics</span>
+                </li>
+                <li data-target="history-section" id="nav-history">
+                    <i class="bi bi-clock-history"></i>
+                    <span>History</span>
+                    <span class="nav-badge" id="transaction-count-badge">0</span>
+                </li>
+                <li data-target="budget-section" id="nav-budget">
+                    <i class="bi bi-pie-chart-fill"></i>
+                    <span>Budget</span>
+                </li>
+                <li data-target="add-transaction-section" id="nav-add">
+                    <i class="bi bi-plus-circle-fill"></i>
+                    <span>Add New</span>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button id="theme-toggle" class="theme-btn">
+                <i class="bi bi-moon-fill"></i>
+                <span>Dark Mode</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+        <!-- Page Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1>Financial Overview</h1>
+                <p class="subtitle">Track, analyse, and grow your finances</p>
+            </div>
+            <div class="header-right">
+                <div class="header-date" id="header-date"></div>
+            </div>
+        </header>
+
+        <!-- ===== DASHBOARD SECTION ===== -->
+        <section id="dashboard-section" class="section">
+
+            <!-- Balance + Summary Cards -->
+            <div class="dashboard-grid">
+                <div class="dashboard-stats">
+                    <div class="card balance-card">
+                        <div class="balance-orb balance-orb-1"></div>
+                        <div class="balance-orb balance-orb-2"></div>
+                        <div class="balance-content">
+                            <div class="balance-top">
+                                <div>
+                                    <p class="balance-label">NET BALANCE</p>
+                                    <h2 id="total-balance">₹0.00</h2>
+                                </div>
+                                <div class="balance-icon-wrap">
+                                    <i class="bi bi-wallet2"></i>
+                                </div>
+                            </div>
+                            <div class="balance-bottom">
+                                <span class="balance-tag" id="balance-status-tag">
+                                    <i class="bi bi-arrow-up-right"></i> All time
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-cards">
+                        <div class="card summary-card income-card">
+                            <div class="card-icon-wrapper income-icon">
+                                <i class="bi bi-arrow-down-left-circle-fill"></i>
+                            </div>
+                            <div class="card-data">
+                                <h4>Total Income</h4>
+                                <p id="total-income" class="money plus">₹0.00</p>
+                            </div>
+                        </div>
+                        <div class="card summary-card expense-card">
+                            <div class="card-icon-wrapper expense-icon">
+                                <i class="bi bi-arrow-up-right-circle-fill"></i>
+                            </div>
+                            <div class="card-data">
+                                <h4>Total Expense</h4>
+                                <p id="total-expense" class="money minus">₹0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doughnut Chart -->
+                <div class="card chart-card">
+                    <div class="card-header-row">
+                        <h3>Income vs Expense</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="spending-chart"></canvas>
+                        <div class="chart-center-label" id="donut-center-label">
+                            <span class="chart-center-val" id="donut-center-val">-</span>
+                            <span class="chart-center-sub">savings</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Row -->
+            <div class="kpi-row">
+                <div class="card kpi-card">
+                    <div class="kpi-icon savings-icon"><i class="bi bi-piggy-bank-fill"></i></div>
+                    <div class="kpi-data">
+                        <p class="kpi-label">Savings Rate</p>
+                        <p class="kpi-value" id="kpi-savings-rate">0%</p>
+                    </div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="kpi-icon count-icon"><i class="bi bi-receipt-cutoff"></i></div>
+                    <div class="kpi-data">
+                        <p class="kpi-label">Transactions</p>
+                        <p class="kpi-value" id="kpi-tx-count">0</p>
+                    </div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="kpi-icon avg-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="kpi-data">
+                        <p class="kpi-label">Avg. Daily Spend</p>
+                        <p class="kpi-value" id="kpi-avg-spend">₹0</p>
+                    </div>
+                </div>
+                <div class="card kpi-card">
+                    <div class="kpi-icon top-icon"><i class="bi bi-trophy-fill"></i></div>
+                    <div class="kpi-data">
+                        <p class="kpi-label">Top Category</p>
+                        <p class="kpi-value" id="kpi-top-category">-</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ANALYTICS SECTION ===== -->
+        <section id="analytics-section" class="section">
+            <div class="section-title-row">
+                <h2 class="section-title"><i class="bi bi-bar-chart-line-fill"></i> Analytics</h2>
+            </div>
+
+            <!-- Charts Grid 2x2 -->
+            <div class="charts-grid">
+                <div class="card chart-card">
+                    <div class="card-header-row">
+                        <h3>Monthly Overview</h3>
+                        <span class="chart-subtitle">Income vs Expense by month</span>
+                    </div>
+                    <div class="chart-wrapper chart-tall">
+                        <canvas id="monthly-chart"></canvas>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <div class="card-header-row">
+                        <h3>Balance Trend</h3>
+                        <span class="chart-subtitle">Net balance over time</span>
+                    </div>
+                    <div class="chart-wrapper chart-tall">
+                        <canvas id="trend-chart"></canvas>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <div class="card-header-row">
+                        <h3>Category Breakdown</h3>
+                        <span class="chart-subtitle">Spending by category</span>
+                    </div>
+                    <div class="chart-wrapper chart-tall">
+                        <canvas id="category-chart"></canvas>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <div class="card-header-row">
+                        <h3>Top Spending Categories</h3>
+                        <span class="chart-subtitle">Ranked by total spend</span>
+                    </div>
+                    <div id="top-categories-list" class="top-categories-list">
+                        <div class="empty-analytics">
+                            <i class="bi bi-bar-chart"></i>
+                            <p>Add transactions to see insights</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== HISTORY SECTION ===== -->
+        <section id="history-section" class="section card section-card">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <h3>Transaction History</h3>
+                </div>
+                <div class="section-header-right">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="search-input" placeholder="Search...">
+                    </div>
+                    <button class="export-btn" id="export-btn">
+                        <i class="bi bi-download"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Chips -->
+            <div class="filter-chips-row">
+                <button class="filter-chip active" data-filter="all">
+                    <i class="bi bi-list-ul"></i> All
+                </button>
+                <button class="filter-chip" data-filter="income">
+                    <i class="bi bi-arrow-down-left"></i> Income
+                </button>
+                <button class="filter-chip" data-filter="expense">
+                    <i class="bi bi-arrow-up-right"></i> Expense
+                </button>
+                <div class="date-range-row">
+                    <div class="date-input-wrap">
+                        <i class="bi bi-calendar3"></i>
+                        <input type="date" id="date-from" title="From date">
+                    </div>
+                    <span class="date-separator">—</span>
+                    <div class="date-input-wrap">
+                        <i class="bi bi-calendar3"></i>
+                        <input type="date" id="date-to" title="To date">
+                    </div>
+                    <button class="clear-date-btn" id="clear-date-btn" title="Clear date filter">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <ul id="transaction-list" class="list"></ul>
+        </section>
+
+        <!-- ===== BUDGET SECTION ===== -->
+        <section id="budget-section" class="section card section-card">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <h3>Budget Tracker</h3>
+                    <p class="section-sub">Monthly spending limits per category</p>
+                </div>
+                <button class="ghost-btn" id="set-budget-btn">
+                    <i class="bi bi-sliders"></i> Set Budgets
+                </button>
+            </div>
+            <div id="budget-bars-container" class="budget-bars-container">
+                <div class="empty-analytics">
+                    <i class="bi bi-pie-chart"></i>
+                    <p>Set budget limits to track your spending</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ADD TRANSACTION SECTION ===== -->
+        <section id="add-transaction-section" class="section card section-card">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <h3>Add New Transaction</h3>
+                    <p class="section-sub">Record your income or expense</p>
+                </div>
+            </div>
+            <form id="transaction-form" class="transaction-form" novalidate>
+                <!-- Type Toggle -->
+                <div class="form-control">
+                    <label>Transaction Type</label>
+                    <div class="type-toggle-group">
+                        <button type="button" id="type-income-btn" class="type-btn active" data-type="income">
+                            <i class="bi bi-cash-coin"></i>
+                            <span>Income</span>
+                        </button>
+                        <button type="button" id="type-expense-btn" class="type-btn" data-type="expense">
+                            <i class="bi bi-bag-dash-fill"></i>
+                            <span>Expense</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Description -->
+                    <div class="form-control">
+                        <label for="text">Description</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-pencil-fill input-icon"></i>
+                            <input type="text" id="text" placeholder="e.g. Salary, Coffee, Rent..." autocomplete="off" maxlength="50">
+                        </div>
+                        <p class="char-counter"><span id="char-count">0</span>/50</p>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-control">
+                        <label for="amount">Amount</label>
+                        <div class="input-wrapper">
+                            <span class="input-prefix">₹</span>
+                            <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Category -->
+                    <div class="form-control">
+                        <label for="category">Category</label>
+                        <div class="input-wrapper select-wrapper">
+                            <i class="bi bi-tag-fill input-icon"></i>
+                            <select id="category">
+                                <option value="Salary">Salary</option>
+                                <option value="Food">Food</option>
+                                <option value="Rent">Rent</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Health">Health</option>
+                                <option value="Education">Education</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="form-control">
+                        <label for="tx-date">Date</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-calendar3 input-icon"></i>
+                            <input type="date" id="tx-date">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-submit-row">
+                    <button class="btn btn-submit" type="submit" id="submit-btn">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <span>Add Transaction</span>
+                    </button>
+                    <button class="btn btn-reset" type="button" id="reset-form-btn">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                </div>
+            </form>
+            <div id="error-message" class="error-msg hide">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>Please fill in a valid description and amount.</span>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ===== PERFECTED DELETE MODAL ===== -->
+<div id="delete-modal" class="modal-overlay hide" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal-box modal-danger-box">
+        <div class="modal-stripe modal-stripe-danger"></div>
+        <div class="modal-body">
+            <div class="modal-icon-wrap danger-icon-wrap">
+                <i class="bi bi-trash3-fill"></i>
+            </div>
+            <div class="modal-text">
+                <h3 id="delete-modal-title">Delete Transaction</h3>
+                <p class="modal-tx-name" id="delete-modal-tx-name">"Transaction Name"</p>
+                <p class="modal-desc">This will permanently remove this transaction from your records. This action cannot be undone.</p>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button id="cancel-delete-btn" class="modal-btn btn-ghost">
+                <i class="bi bi-x-lg"></i> Cancel
+            </button>
+            <button id="confirm-delete-btn" class="modal-btn btn-destructive">
+                <i class="bi bi-trash3"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== BUDGET SET MODAL ===== -->
+<div id="budget-modal" class="modal-overlay hide" role="dialog" aria-modal="true" aria-labelledby="budget-modal-title">
+    <div class="modal-box modal-info-box">
+        <div class="modal-stripe modal-stripe-info"></div>
+        <div class="modal-body">
+            <div class="modal-icon-wrap info-icon-wrap">
+                <i class="bi bi-sliders"></i>
+            </div>
+            <div class="modal-text">
+                <h3 id="budget-modal-title">Set Monthly Budgets</h3>
+                <p class="modal-desc">Define monthly spending limits for each category. Leave blank to remove a limit.</p>
+            </div>
+        </div>
+        <form id="budget-form" class="budget-form">
+            <div class="budget-form-grid" id="budget-form-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </form>
+        <div class="modal-actions">
+            <button id="cancel-budget-btn" class="modal-btn btn-ghost">
+                <i class="bi bi-x-lg"></i> Cancel
+            </button>
+            <button id="save-budget-btn" class="modal-btn btn-primary">
+                <i class="bi bi-check-lg"></i> Save Budgets
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
